@@ -309,7 +309,7 @@ def paint(out, spec, xs, ys, heights):
     except Exception:return None
 
 
-def warm_cell(i, j):
+def warm_cell(i, j, *, coast_dataset=None):
     """All remote / large GIS work is outside the terrain safety worker."""
     import zipfile
     import httpx
@@ -324,10 +324,12 @@ def warm_cell(i, j):
     from .terrain_sources import cached_download
     folder = directory(i,j);folder.mkdir(exist_ok=True)
     bounds = [i*CELL,j*CELL,(i+1)*CELL,(j+1)*CELL]
-    archive = Path(os.getenv('WWOS_COAST_OSM_ARCHIVE',''))
-    if not archive.is_file():archive,_ = cached_download(LAND_URL,'coastal-land-polygons.zip',1500*1024**2,900)
-    with zipfile.ZipFile(archive) as z:member = next(n for n in z.namelist() if n.endswith('.shp'))
-    metadata,_,geometries,_ = pyogrio.raw.read('/vsizip/'+str(archive.resolve())+'/'+member,bbox=tuple(bounds),columns=[])
+    if coast_dataset is None:
+        archive = Path(os.getenv('WWOS_COAST_OSM_ARCHIVE',''))
+        if not archive.is_file():archive,_ = cached_download(LAND_URL,'coastal-land-polygons.zip',1500*1024**2,900)
+        with zipfile.ZipFile(archive) as z:member = next(n for n in z.namelist() if n.endswith('.shp'))
+        coast_dataset='/vsizip/'+str(archive.resolve())+'/'+member
+    metadata,_,geometries,_ = pyogrio.raw.read(str(coast_dataset),bbox=tuple(bounds),columns=[])
     if metadata['crs']!='EPSG:4326':raise ValueError('coast_crs_mismatch')
     land = shapely.union_all([shapely.from_wkb(g) for g in geometries]).intersection(box(*bounds))
     if not land.is_valid:raise ValueError('coast_invalid_source_geometry')
@@ -386,10 +388,46 @@ def warm():
     finally:shutil.rmtree(lock,ignore_errors=True)
 
 
+def warm_region(spec):
+    """Prepare a region's verified imagery before exporting its textured mesh."""
+    import tempfile,zipfile
+    from .terrain import validate,projection
+    from .terrain_sources import cached_download
+    spec=validate(spec);inverse=projection(spec)[2]
+    xx,yy=np.meshgrid(np.linspace(-spec['width_m']/2,spec['width_m']/2,spec['samples']),
+                      np.linspace(-spec['height_m']/2,spec['height_m']/2,spec['samples']))
+    cells=keys(*inverse.transform(xx,yy))
+    archive=Path(os.getenv('WWOS_COAST_OSM_ARCHIVE',''))
+    if not archive.is_file():archive,_=cached_download(LAND_URL,'coastal-land-polygons.zip',1500*1024**2,900)
+    # Repeated random access inside the compressed global shapefile is costly.
+    with tempfile.TemporaryDirectory(prefix='posim-terrain-coast-') as temporary,zipfile.ZipFile(archive) as source:
+        member=next(name for name in source.namelist() if name.endswith('.shp'));stem=member[:-4]
+        for suffix in ('.shp','.shx','.dbf','.prj','.cpg','.qix'):
+            name=stem+suffix
+            if name not in source.namelist():continue
+            with source.open(name) as incoming,(Path(temporary)/Path(name).name).open('wb') as outgoing:
+                shutil.copyfileobj(incoming,outgoing)
+        dataset=Path(temporary)/Path(member).name
+        for index,(i,j) in enumerate(cells,1):
+            folder=directory(i,j)
+            try:
+                cached=json.loads((folder/'manifest.json').read_text())
+                expected={'land.json','satellite.png'} if cached.get('status')=='ready' else {'land.json'}
+                ready=(cached.get('revision')==REVISION and cached.get('cell')==[i,j]
+                       and cached.get('status') in ('ready','no_land') and imagery_current(cached)
+                       and set(cached.get('hashes',{}))==expected
+                       and all(digest(folder/name)==checksum for name,checksum in cached['hashes'].items()))
+            except (OSError,ValueError,KeyError,TypeError):ready=False
+            if not ready:
+                warm_cell(i,j,coast_dataset=dataset)
+            print(f'{index}/{len(cells)} atlas_{i}_{j} ready',flush=True)
+
 if __name__=='__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--warm',action='store_true')
     parser.add_argument('--cell',nargs=2,type=int)
+    parser.add_argument('--spec',type=Path,help='Warm the complete region before a textured export')
     args = parser.parse_args()
-    if args.cell:warm_cell(*args.cell)
+    if args.spec:warm_region(json.loads(args.spec.read_text()))
+    elif args.cell:warm_cell(*args.cell)
     else:warm()

@@ -26,6 +26,15 @@ python -m posim_terrain --spec examples/busan.json --output out/busan
 
 수치 자료로 지형 메시와 SDF를 내보냅니다. 설치된 POSIM의 해양 월드를 포함하고 Gazebo로 SDF를 검사하려면 POSIM·ROS 환경에서 `--engine-world`를 추가합니다.
 
+위성 텍스처를 포함하려면 Sentinel-2 캐시를 준비한 뒤 지형을 생성합니다.
+
+```sh
+python -m posim_terrain.coastal_detail --spec examples/busan.json
+python -m posim_terrain --spec examples/busan.json --output out/busan
+```
+
+캐시 준비 명령은 해당 지역의 구름이 적은 Sentinel-2 RGB 영상과 OSM 해안선 자료를 받습니다. `manifest.json`에 텍스처 상태를 기록합니다. 텍스처 준비 중에도 수치 고도는 유지합니다.
+
 ```python
 from posim_terrain.terrain import build
 

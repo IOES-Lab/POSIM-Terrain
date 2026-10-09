@@ -1,32 +1,41 @@
 [
   {
     "city": "new-york",
-    "bytes": 8548876,
-    "sha256": "70c277698c9f8667aa3c9d52e3073bfa4cb552579f867102f68fa8ba36ab6ea0",
+    "bytes": 35565521,
+    "sha256": "873aab34c9aaf36a3e9e610c3f0c16b3b4bd09ee047c291b4517d9fd35d56cf7",
     "minimum_m": -27.925835267600753,
     "maximum_m": 144.95851218497683,
-    "source": "GEBCO_2026 + Copernicus_GLO30 + Copernicus_Marine_SDB_202511",
+    "source": "GEBCO_2026 + Copernicus_GLO30 + Copernicus_Marine_SDB_202511 + Sentinel-2 RGB",
     "land_vertices": 50721,
-    "ocean_vertices": 15328
+    "ocean_vertices": 15328,
+    "satellite_texture": "land-satellite.png",
+    "satellite_sha256": "115131516f2f772c12eb899607b68889e0f3e207c4c49b17cefb718ab17ef6de",
+    "satellite_source_cells": 24
   },
   {
     "city": "busan",
-    "bytes": 8656597,
-    "sha256": "872f98a7fc043f165935ae252e8eb59ee97ba8c1f8a89285989b4543d603d51e",
+    "bytes": 29220326,
+    "sha256": "ba7ce92c5b8c9177d1a5a44735b70e4b85a1bee1c934801196b19b65db373876",
     "minimum_m": -93.9332755435224,
     "maximum_m": 571.205653064734,
-    "source": "GEBCO_2026 + Copernicus_GLO30 + Copernicus_Marine_SDB_202511 + KHOA_BADA2024",
+    "source": "GEBCO_2026 + Copernicus_GLO30 + Copernicus_Marine_SDB_202511 + KHOA_BADA2024 + Sentinel-2 RGB",
     "land_vertices": 32002,
-    "ocean_vertices": 34047
+    "ocean_vertices": 34047,
+    "satellite_texture": "land-satellite.png",
+    "satellite_sha256": "d845ef45b8b46a561ee419cdd7c16944412d8b5d362c76023d0f5310e8c299e8",
+    "satellite_source_cells": 30
   },
   {
     "city": "tokyo",
-    "bytes": 8169630,
-    "sha256": "0b0a4ddbc6897f487ed5006f33080cf89ec91a5e41d288243d2d744684cd83f6",
+    "bytes": 29433020,
+    "sha256": "6a99950f8b3290cddc8a42513c55385e56a503a69c30a18b84bff97a4613b141",
     "minimum_m": -39.033821528077716,
     "maximum_m": 58.69669044346933,
-    "source": "GEBCO_2026 + Copernicus_GLO30 + Copernicus_Marine_SDB_202511",
+    "source": "GEBCO_2026 + Copernicus_GLO30 + Copernicus_Marine_SDB_202511 + Sentinel-2 RGB",
     "land_vertices": 33133,
-    "ocean_vertices": 32916
+    "ocean_vertices": 32916,
+    "satellite_texture": "land-satellite.png",
+    "satellite_sha256": "400dadbc9ceada26d80221eeae68966830e3aa29acfd987f4be88d081bf3655d",
+    "satellite_source_cells": 20
   }
 ]

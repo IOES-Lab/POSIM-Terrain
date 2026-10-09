@@ -1,0 +1,116 @@
+[
+  {
+    "city": "new-york",
+    "renderer": "Gazebo Sim 10 Ogre2 Metal",
+    "partition": "posim-city-capture-1c80b7b65eef48dd8d1acf1a67de73e7",
+    "passed": true,
+    "cameras": {
+      "world": {
+        "file": "new-york-world.png",
+        "width": 1600,
+        "height": 1000,
+        "frames": 4,
+        "sim_time": 1.5,
+        "sha256": "9aa9e47456a219c3b5529627f9cc2cc7280396eb0d91dd67a3ed3e78fd7d42b9"
+      },
+      "harbour": {
+        "file": "new-york-harbour.png",
+        "width": 1600,
+        "height": 1000,
+        "frames": 4,
+        "sim_time": 1.5,
+        "sha256": "f1e7d454e7489a6a970cbc8a091bd2aafc2e9ca72becb4609aefd3705612564d"
+      }
+    },
+    "exit_code": 0,
+    "numeric_sha256": "6056a25ded1b46e259f2fab19d5c49af803e92febfe58fb6492702ebed3f3a8b",
+    "satellite_sha256": "115131516f2f772c12eb899607b68889e0f3e207c4c49b17cefb718ab17ef6de",
+    "elevation_scale": 1.0,
+    "sea_surface_m": 0.0,
+    "sea_surface": "flat preview surface",
+    "spec": {
+      "latitude": 40.65,
+      "longitude": -74.035,
+      "width_m": 20000,
+      "height_m": 20000,
+      "samples": 257,
+      "source_policy": "auto"
+    }
+  },
+  {
+    "city": "busan",
+    "renderer": "Gazebo Sim 10 Ogre2 Metal",
+    "partition": "posim-city-capture-1c80b7b65eef48dd8d1acf1a67de73e7",
+    "passed": true,
+    "cameras": {
+      "world": {
+        "file": "busan-world.png",
+        "width": 1600,
+        "height": 1000,
+        "frames": 4,
+        "sim_time": 1.5,
+        "sha256": "0c560e02eee03253ccfa5d294ab6a227a3061c72fd7c178e6631e348185800a0"
+      },
+      "harbour": {
+        "file": "busan-harbour.png",
+        "width": 1600,
+        "height": 1000,
+        "frames": 4,
+        "sim_time": 1.5,
+        "sha256": "2607ad7f3eae980c8aeca50eca8a6088b7a56f32791ad6fb82c81f635bb0ead2"
+      }
+    },
+    "exit_code": 0,
+    "numeric_sha256": "0104a768f3900407814d4d9c7744afaafd85743c645a5e1d934910036df0d3be",
+    "satellite_sha256": "d845ef45b8b46a561ee419cdd7c16944412d8b5d362c76023d0f5310e8c299e8",
+    "elevation_scale": 1.0,
+    "sea_surface_m": 0.0,
+    "sea_surface": "flat preview surface",
+    "spec": {
+      "latitude": 35.09,
+      "longitude": 129.055,
+      "width_m": 20000,
+      "height_m": 20000,
+      "samples": 257,
+      "source_policy": "auto"
+    }
+  },
+  {
+    "city": "tokyo",
+    "renderer": "Gazebo Sim 10 Ogre2 Metal",
+    "partition": "posim-city-capture-1c80b7b65eef48dd8d1acf1a67de73e7",
+    "passed": true,
+    "cameras": {
+      "world": {
+        "file": "tokyo-world.png",
+        "width": 1600,
+        "height": 1000,
+        "frames": 4,
+        "sim_time": 1.5,
+        "sha256": "f59cf1a96a9e277b07b240cb1e04d2d2ac6b86fb2c12a8f1da3c0e8b6a775387"
+      },
+      "harbour": {
+        "file": "tokyo-harbour.png",
+        "width": 1600,
+        "height": 1000,
+        "frames": 4,
+        "sim_time": 1.5,
+        "sha256": "11b00e6997901c0e54871a341b98e7cca99bd6fd1626b21833f1ba138472065a"
+      }
+    },
+    "exit_code": 0,
+    "numeric_sha256": "2cb6e6058f4ed8a1d6e4cc7c48de93649b04b77c30b81c328b06085e352d6404",
+    "satellite_sha256": "400dadbc9ceada26d80221eeae68966830e3aa29acfd987f4be88d081bf3655d",
+    "elevation_scale": 1.0,
+    "sea_surface_m": 0.0,
+    "sea_surface": "flat preview surface",
+    "spec": {
+      "latitude": 35.6,
+      "longitude": 139.83,
+      "width_m": 20000,
+      "height_m": 20000,
+      "samples": 257,
+      "source_policy": "auto"
+    }
+  }
+]

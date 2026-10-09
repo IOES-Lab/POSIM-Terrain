@@ -26,6 +26,15 @@ python -m posim_terrain --spec examples/busan.json --output out/busan
 
 This exports a terrain mesh and SDF using numeric sources. To include the installed POSIM ocean world and run Gazebo's SDF check, add `--engine-world` in a configured POSIM/ROS environment.
 
+For a satellite-textured export, prepare the Sentinel-2 cache first, then generate the region:
+
+```sh
+python -m posim_terrain.coastal_detail --spec examples/busan.json
+python -m posim_terrain --spec examples/busan.json --output out/busan
+```
+
+The cache command downloads clear Sentinel-2 RGB imagery and OSM coastline cells for the region. `manifest.json` records the texture status. Texture preparation preserves the numeric elevation field.
+
 ```python
 from posim_terrain.terrain import build
 
