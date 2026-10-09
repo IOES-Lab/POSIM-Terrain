@@ -143,15 +143,25 @@ def load(lon, lat):
     return records
 
 
-def fingerprint():
-    """Only future jobs see newly ready data; resident collision stays immutable."""
+def fingerprint(spec=None):
+    """Identify only atlas cells used by this region, without changing a world."""
     ready=[]
-    for path in sorted(root().glob('atlas_*/manifest.json')):
+    cells=[]
+    if spec is not None:
+        from .terrain import projection
+        _,_,inverse=projection(spec)
+        window=spec.get('_stream_grid')
+        xs=np.asarray(window['xs']) if window else np.linspace(-spec['width_m']/2,spec['width_m']/2,spec.get('samples',129))
+        ys=np.asarray(window['ys']) if window else np.linspace(-spec['height_m']/2,spec['height_m']/2,spec.get('samples',129))
+        lon,lat=inverse.transform(*np.meshgrid(xs,ys))
+        cells=keys(lon,lat)
+    for i,j in cells:
+        path=directory(i,j)/'manifest.json'
         try:
             m=json.loads(path.read_text())
-            ready.append((path.parent.name,m.get('revision'),m.get('hashes')))
-        except (OSError,ValueError):continue
-    return hashlib.sha256(json.dumps([PIPELINE_REVISION,ready],sort_keys=True).encode()).hexdigest()[:16]
+            ready.append((i,j,m.get('revision'),m.get('status'),m.get('hashes')))
+        except (OSError,ValueError):ready.append((i,j,'missing'))
+    return hashlib.sha256(json.dumps([PIPELINE_REVISION,VISUAL_REVISION,IMAGERY_REVISION,ready],sort_keys=True).encode()).hexdigest()[:16]
 
 
 def masks(records, lon, lat):

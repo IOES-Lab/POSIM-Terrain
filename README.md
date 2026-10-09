@@ -34,6 +34,7 @@ python -m posim_terrain --spec examples/busan.json --output out/busan
 ```
 
 The cache command downloads clear Sentinel-2 RGB imagery and OSM coastline cells for the region. `manifest.json` records the texture status. Texture preparation preserves the numeric elevation field.
+Source identity includes the coastal data for the requested region. Refreshing another region preserves that identity.
 
 ```python
 from posim_terrain.terrain import build

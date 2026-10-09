@@ -34,6 +34,7 @@ python -m posim_terrain --spec examples/busan.json --output out/busan
 ```
 
 캐시 준비 명령은 해당 지역의 구름이 적은 Sentinel-2 RGB 영상과 OSM 해안선 자료를 받습니다. `manifest.json`에 텍스처 상태를 기록합니다. 텍스처 준비 중에도 수치 고도는 유지합니다.
+자료 식별값에는 생성 지역의 연안 자료를 포함합니다. 다른 지역의 자료를 갱신해도 이 값은 유지합니다.
 
 ```python
 from posim_terrain.terrain import build

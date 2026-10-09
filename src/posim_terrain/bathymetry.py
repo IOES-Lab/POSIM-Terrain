@@ -61,7 +61,7 @@ def local_export(name,lon,lat):
     except Exception as error:return empty(lon),dict(record,status='unavailable',reason=error_reason(error))
 
 
-def config_fingerprint():
+def config_fingerprint(spec=None):
     """Source configuration changes invalidate cached worlds without exposing paths."""
     values=[]
     for name in ('WWOS_CESIUM_EXPORT','WWOS_EMODNET_EXPORT'):
@@ -72,7 +72,9 @@ def config_fingerprint():
     from .canal_override import fingerprint
     values.append(['Suez_simulation_override',fingerprint()])
     from .coastal_detail import REVISION,fingerprint as detail_fingerprint
-    values.append(['coastal_detail',REVISION,os.getenv('WWOS_COASTAL_DETAIL','1'),detail_fingerprint()])
+    enabled=os.getenv('WWOS_COASTAL_DETAIL','1')
+    region=spec if enabled=='1' and spec is not None and spec.get('source_policy','auto')=='auto' else None
+    values.append(['coastal_detail',REVISION,enabled,detail_fingerprint(region)])
     return hashlib.sha256(json.dumps(values).encode()).hexdigest()[:20]
 
 
