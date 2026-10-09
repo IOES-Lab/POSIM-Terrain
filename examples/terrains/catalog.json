@@ -1,0 +1,32 @@
+[
+  {
+    "city": "new-york",
+    "bytes": 8548876,
+    "sha256": "70c277698c9f8667aa3c9d52e3073bfa4cb552579f867102f68fa8ba36ab6ea0",
+    "minimum_m": -27.925835267600753,
+    "maximum_m": 144.95851218497683,
+    "source": "GEBCO_2026 + Copernicus_GLO30 + Copernicus_Marine_SDB_202511",
+    "land_vertices": 50721,
+    "ocean_vertices": 15328
+  },
+  {
+    "city": "busan",
+    "bytes": 8656597,
+    "sha256": "872f98a7fc043f165935ae252e8eb59ee97ba8c1f8a89285989b4543d603d51e",
+    "minimum_m": -93.9332755435224,
+    "maximum_m": 571.205653064734,
+    "source": "GEBCO_2026 + Copernicus_GLO30 + Copernicus_Marine_SDB_202511 + KHOA_BADA2024",
+    "land_vertices": 32002,
+    "ocean_vertices": 34047
+  },
+  {
+    "city": "tokyo",
+    "bytes": 8169630,
+    "sha256": "0b0a4ddbc6897f487ed5006f33080cf89ec91a5e41d288243d2d744684cd83f6",
+    "minimum_m": -39.033821528077716,
+    "maximum_m": 58.69669044346933,
+    "source": "GEBCO_2026 + Copernicus_GLO30 + Copernicus_Marine_SDB_202511",
+    "land_vertices": 33133,
+    "ocean_vertices": 32916
+  }
+]
