@@ -203,7 +203,9 @@ def world_template():
         share=get_package_share_directory('dave_worlds');name='dave_ocean_waves.world'
     return Path(share)/'worlds'/name
 
-def build(spec, out, *, engine_world=True, validate_sdf=True):
+def build(spec, out, *, engine_world=True, validate_sdf=True, numeric_only=False):
+    if numeric_only and (engine_world or validate_sdf):
+        raise ValueError('numeric_only_requires_no_engine_or_sdf_validation')
     spec=validate(spec);out=Path(out);out.mkdir(parents=True,exist_ok=True)
     local, forward, inverse=projection(spec)
     n=spec['samples'];xs=np.linspace(-spec['width_m']/2,spec['width_m']/2,n);ys=np.linspace(-spec['height_m']/2,spec['height_m']/2,n)
@@ -287,6 +289,10 @@ def build(spec, out, *, engine_world=True, validate_sdf=True):
     (out/'manifest.json').write_text(json.dumps(meta,indent=2))
     meta['coastal_detail']=detail
     np.savez_compressed(out/'projected.npz',xs=xs,ys=ys,elevation=heights,latitude=lat,longitude=lon,provider=provider,water_mask=water_mask)
+    if numeric_only:
+        meta.update(engine_world=False,sdf_validation='Numeric terrain only; no SDF exported')
+        (out/'manifest.json').write_text(json.dumps(meta,indent=2))
+        return meta
     write_mesh(out/'terrain.dae',xs,ys,heights)
     if engine_world:
         tree=ET.parse(world_template())
