@@ -77,3 +77,7 @@ python -m unittest discover -s tests
 ```
 
 Code: [Apache-2.0](LICENSE). Datasets retain their own terms and attribution.
+
+## Seabed appearance
+
+Seabed visuals use the packaged 2K diffuse, OpenGL normal and roughness maps from [Aerial Beach 01 by Rob Tuytel](https://polyhaven.com/a/aerial_beach_01), licensed [CC0](https://polyhaven.com/license). The texture repeats every 30 m and contains no baked grid. Asset URLs and SHA-256 hashes are recorded in `src/posim_terrain/assets/seabed/manifest.json`. Runtime texture use requires no network access. The imagery represents generic sand; numeric bathymetry defines the actual terrain.

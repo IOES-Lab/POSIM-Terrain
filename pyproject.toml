@@ -15,4 +15,4 @@ dependencies = ["numpy>=1.24", "scipy>=1.10", "pyproj>=3.5", "Pillow>=10", "rast
 where = ["src"]
 
 [tool.setuptools.package-data]
-posim_terrain = ["data/*"]
+posim_terrain = ["data/*", "assets/seabed/*"]
