@@ -13,3 +13,5 @@ Generated terrain retains per-provider URLs, checksums, attribution and datum as
 - Optional regional bathymetry and permitted numeric exports retain their own terms.
 
 The code license does not replace dataset terms. See [GEBCO terms](https://www.gebco.net/data-products/gridded-bathymetry-data), [Copernicus DEM collection](https://spacedata.copernicus.eu/collections/copernicus-digital-elevation-model), and [OpenStreetMap copyright](https://www.openstreetmap.org/copyright).
+
+Packaged seabed maps: [Aerial Beach 01 by Rob Tuytel, Poly Haven](https://polyhaven.com/a/aerial_beach_01), [CC0-1.0](https://polyhaven.com/license). The original 2K diffuse, OpenGL normal and roughness maps are included with source URLs and checksums in `src/posim_terrain/assets/seabed/manifest.json`.
