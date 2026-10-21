@@ -77,3 +77,7 @@ python -m unittest discover -s tests
 ```
 
 코드: [Apache-2.0](LICENSE). 데이터에는 각 자료의 이용 조건과 출처 표시가 적용됩니다.
+
+## 해저면 표현
+
+해저면은 [Rob Tuytel의 Aerial Beach 01](https://polyhaven.com/a/aerial_beach_01)에서 제공한 2K 컬러·OpenGL 노멀·거칠기 맵을 사용합니다. 라이선스는 [CC0](https://polyhaven.com/license)입니다. 질감은 30 m마다 반복되며 격자선이 포함되어 있지 않습니다. 이미지 URL과 SHA-256 해시는 `src/posim_terrain/assets/seabed/manifest.json`에 기록되어 있습니다. 실행 중 질감 사용에는 네트워크 연결이 필요하지 않습니다. 이미지는 일반적인 모래를 표현하며 실제 지형 형상은 수치 수심 자료로 정합니다.

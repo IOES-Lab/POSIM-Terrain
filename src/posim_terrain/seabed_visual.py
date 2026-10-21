@@ -1,4 +1,4 @@
-"""Synthetic metric sand/grid visual; never changes measured collision heights."""
+"""Textured sand visual with runtime measurement overlays; never changes measured collision heights."""
 from pathlib import Path
 import json
 import hashlib
@@ -27,18 +27,24 @@ def renderer_albedo(path):
         finally:temporary.unlink(missing_ok=True)
     return target
 
+SEABED_SCALE_M = 30
+SEABED_ASSETS = Path(__file__).parent/'assets'/'seabed'
+
 def texture(path):
-    size=512
-    rng=np.random.default_rng(20261002)
-    y,x=np.indices((size,size))
-    grain=rng.normal(0,8,(size,size)) + 6*np.sin(x*.17+2*np.sin(y*.027))
-    pixels=np.clip(np.array([164,145,104])[None,None,:]+grain[...,None],0,255).astype(np.uint8)
-    image=Image.fromarray(pixels)
-    draw=ImageDraw.Draw(image)
-    for p in range(0,size,128):
-        draw.line((p,0,p,size),fill=(18,18,18),width=4)
-        draw.line((0,p,size,p),fill=(18,18,18),width=4)
-    image.save(path)
+    """Install CC0 sand without baked measurement lines; preserve old callers."""
+    with Image.open(SEABED_ASSETS/'aerial_beach_01_diff_2k.jpg') as source:
+        source.save(path)
+
+def sand_assets(out):
+    import shutil
+    result={}
+    for channel in ('diff','nor_gl','rough'):
+        source=SEABED_ASSETS/f'aerial_beach_01_{channel}_2k.jpg'
+        digest=hashlib.sha256(source.read_bytes()).hexdigest()[:16]
+        target=Path(out)/f'seabed-sand-{channel}-{digest}.jpg'
+        if not target.is_file():shutil.copyfile(source,target)
+        result[channel]=target
+    return result
 
 def shoreline_pixels(pixels,elevation):
     """Blend terrain in a narrow height band around mean sea level.
@@ -81,9 +87,9 @@ def shoreline_albedo(out,xs,ys,heights,land_texture):
                      ys[-1]-(np.arange(ny)+.5)*height/ny)
     if not land_texture:
         with Image.open(source) as image: sand=np.asarray(image.convert('RGB'))
-        # Match the existing absolute-metre, 4 m repeating seabed UVs.
-        u=np.floor(np.mod(xx/4,1)*sand.shape[1]).astype(int)
-        v=np.floor(np.mod(-yy/4,1)*sand.shape[0]).astype(int)
+        # Match the existing absolute-metre, 30 m repeating seabed UVs.
+        u=np.floor(np.mod(xx/SEABED_SCALE_M,1)*sand.shape[1]).astype(int)
+        v=np.floor(np.mod(-yy/SEABED_SCALE_M,1)*sand.shape[0]).astype(int)
         base=sand[v,u]
     graded=shoreline_pixels(base,surface_height(xs,ys,heights,xx,yy))
     if land_texture and np.array_equal(graded,base):return renderer_albedo(source)
@@ -99,6 +105,7 @@ def decorate_link(link,out,xs,ys,heights,*,normals=None,land_texture=None,prefix
     from .terrain import write_mesh
     out=Path(out)
     texture(out/'seabed-grid.png')
+    sand=sand_assets(out)
     for visual in list(link.findall('visual')):link.remove(visual)
     h=np.asarray(heights)
     a,b,c,d=h[:-1,:-1],h[:-1,1:],h[1:,:-1],h[1:,1:]
@@ -109,13 +116,13 @@ def decorate_link(link,out,xs,ys,heights,*,normals=None,land_texture=None,prefix
         land=maximum>=0
         shallow_seabed=shallow&~land
         albedo=shoreline_albedo(out,xs,ys,h,land_texture) if land.any() else out/land_texture['file']
-        parts=[('seabed',~(land|shallow_seabed),4,(0,0),'seabed-grid.png'),
+        parts=[('seabed',~(land|shallow_seabed),SEABED_SCALE_M,(0,0),sand['diff']),
                ('land',land,(xs[-1]-xs[0],ys[-1]-ys[0]),(-xs[0],-ys[0]),albedo)]
         if shallow_seabed.any():
             parts.append(('shallow',shallow_seabed,(xs[-1]-xs[0],ys[-1]-ys[0]),(-xs[0],-ys[0]),
                           shoreline_albedo(out,xs,ys,h,None)))
     else:
-        parts=[('seabed',~shallow,4,(0,0),'seabed-grid.png')]
+        parts=[('seabed',~shallow,SEABED_SCALE_M,(0,0),sand['diff'])]
         if shallow.any():
             parts.append(('shallow',shallow,(xs[-1]-xs[0],ys[-1]-ys[0]),(-xs[0],-ys[0]),
                           shoreline_albedo(out,xs,ys,h,None)))
@@ -131,6 +138,9 @@ def decorate_link(link,out,xs,ys,heights,*,normals=None,land_texture=None,prefix
         albedo=out/image
         ET.SubElement(metal,'albedo_map').text=str(albedo.resolve())
         ET.SubElement(metal,'roughness').text='1'
+        if name=='seabed':
+            ET.SubElement(metal,'normal_map').text=str(sand['nor_gl'].resolve())
+            ET.SubElement(metal,'roughness_map').text=str(sand['rough'].resolve())
         ET.SubElement(metal,'metalness').text='0'
 
 def decorate(tree,out,xs,ys,heights,*,land_texture=None):

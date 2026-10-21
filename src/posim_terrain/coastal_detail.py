@@ -111,8 +111,11 @@ def request(cells):
             shutil.rmtree(lock,ignore_errors=True)
     log = (root()/'warmer.log').open('ab')
     try:
-        subprocess.Popen([sys.executable,"-m","posim_terrain.coastal_detail",'--warm'],
+        process=subprocess.Popen([sys.executable,"-m","posim_terrain.coastal_detail",'--warm'],
                          stdout=log,stderr=log,start_new_session=True)
+        if os.getenv('WWOS_NATIVE_OWNER'):
+            from process_group import register_group
+            register_group(process,os.environ['WWOS_DATA_DIR'],os.environ['WWOS_NATIVE_OWNER'])
     except OSError:pass
     finally:log.close()
 

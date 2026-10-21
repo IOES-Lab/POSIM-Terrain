@@ -18,7 +18,7 @@ from shapely.geometry import box,mapping
 ROOT=Path(__file__).resolve().parents[1]
 import posim_terrain.coastal_detail as detail
 from posim_terrain.terrain import projection
-from posim_terrain.seabed_visual import decorate_link,prepare,shoreline_pixels
+from posim_terrain.seabed_visual import decorate_link,prepare,shoreline_pixels,sand_assets
 
 
 class CoastalSafety(unittest.TestCase):
@@ -97,7 +97,7 @@ class CoastalSafety(unittest.TestCase):
                     visual=link.find('visual');land=imagery and height>=0
                     self.assertEqual(visual.get('name'),'land' if land else 'seabed')
                     albedo=Path(visual.findtext('material/pbr/metal/albedo_map'))
-                    self.assertEqual(albedo.read_bytes(),(out/('land-satellite.png' if land else 'seabed-grid.png')).read_bytes())
+                    self.assertEqual(albedo.read_bytes(),(out/'land-satellite.png' if land else sand_assets(out)['diff']).read_bytes())
                     self.assertFalse((out/'land-shoreline.png').exists())
                     self.assertFalse((out/'seabed-shoreline.png').exists())
 
