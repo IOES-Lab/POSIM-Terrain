@@ -2,6 +2,8 @@
 
 [한국어](README.ko.md)
 
+> This project is developed with assistance from large language models (LLMs).
+
 Generate land and ocean terrain from latitude and longitude. POSIM-Terrain exports one numeric field for meshes, collision checks and sensor geometry. WWW-POSIM uses this library for its geographic worlds.
 
 ## Install
