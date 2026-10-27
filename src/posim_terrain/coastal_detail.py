@@ -359,7 +359,10 @@ def warm_cell(i, j, *, coast_dataset=None):
         candidates = [f for f in features if shape(f['geometry']).covers(box(*bounds))]
         best = None;pixels = 560;affine = from_bounds(*bounds,pixels,pixels)
         with rasterio.Env(GDAL_DISABLE_READDIR_ON_OPEN='EMPTY_DIR',CPL_VSIL_CURL_ALLOWED_EXTENSIONS='.tif',GDAL_HTTP_TIMEOUT='15',GDAL_HTTP_MAX_RETRY='1'):
-            for item in candidates[:12]:
+            # A scene's global cloud score does not describe this atlas cell.
+            # Search the bounded query result before rejecting local coverage;
+            # retain the same recent-date window and five-percent quality gate.
+            for item in candidates[:60]:
                 visual,quality = item['assets']['visual']['href'],item['assets']['scl']['href']
                 if not all(u.startswith('https://sentinel-cogs.s3.') for u in [visual,quality]):raise ValueError('unexpected_sentinel_asset_host')
                 with rasterio.open(visual) as src,WarpedVRT(src,crs='EPSG:4326',transform=affine,width=pixels,height=pixels,resampling=Resampling.bilinear) as vrt:values = vrt.read([1,2,3])
