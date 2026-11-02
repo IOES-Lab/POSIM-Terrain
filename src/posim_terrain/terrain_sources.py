@@ -20,23 +20,36 @@ def cache_root():
     return p
 
 
-def cached_download(url,name,limit,deadline_seconds=100):
+def cached_download(url,name,limit,deadline_seconds=100,validator=None):
     root=cache_root();path=root/name
     if not path.exists():
         temp=path.with_name(path.name+'.'+uuid.uuid4().hex+'.part')
         try:
             start=time.monotonic();size=0
             request=urllib.request.Request(url,headers={'User-Agent':'WorldwideOceanSimulator/0.1'})
-            with urllib.request.urlopen(request,timeout=20) as response, temp.open('wb') as out:
-                while chunk:=response.read(256*1024):
+            # read() may wait for the whole block while a server trickles data.
+            # read1() returns after one underlying read, allowing deadline checks.
+            # A stalled read/header is still bounded by the socket idle timeout;
+            # this is not a strict wall-clock timeout for the entire request.
+            with urllib.request.urlopen(request,timeout=min(20,deadline_seconds)) as response, temp.open('wb') as out:
+                expected_size=getattr(response,'length',None)
+                if expected_size is not None and expected_size>limit:raise ValueError('source_download_limit')
+                while True:
+                    if time.monotonic()-start>deadline_seconds:raise ValueError('source_download_deadline')
+                    chunk=response.read1(256*1024)
+                    if time.monotonic()-start>deadline_seconds:raise ValueError('source_download_deadline')
+                    if not chunk:break
                     size+=len(chunk)
-                    if size>limit or time.monotonic()-start>deadline_seconds:raise ValueError('source_download_limit')
+                    if size>limit:raise ValueError('source_download_limit')
                     out.write(chunk)
+                if expected_size is not None and size!=expected_size:raise ValueError('incomplete_source_response')
             if size<16:raise ValueError('empty_source_response')
+            if validator is not None:validator(temp)
             temp.replace(path)
         finally:
             temp.unlink(missing_ok=True)
     if path.stat().st_size>limit:raise ValueError('cached_source_limit')
+    if validator is not None:validator(path)
     meta_path=path.with_suffix(path.suffix+'.json')
     signature=[path.stat().st_size,path.stat().st_mtime_ns]
     try:meta=json.loads(meta_path.read_text()) if meta_path.exists() else {}

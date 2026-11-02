@@ -140,6 +140,17 @@ def marine(lon,lat):
     except Exception as error:return empty(lon),dict(record,status='unavailable',reason=error_reason(error))
 
 
+def validate_khoa_file(path):
+    # A server may close without Content-Length before completing the HDF5 file.
+    # Validate before publishing it to the persistent download cache.
+    from netCDF4 import Dataset
+    with Dataset(path) as data:
+        if set(data.variables)!={'Lat','Lon','MSL'}:raise ValueError('unsupported_khoa_release_schema')
+        for name in ('Lat','Lon','MSL'):
+            if len(data[name])==0:raise ValueError('empty_khoa_variable')
+            data[name][-1]
+
+
 def khoa(lon,lat):
     record={'provider':SOURCE_IDS[6],'native_spacing_m':150,'vertical_datum':'MSL',
       'release':'BADA2024','attribution':'Korea Hydrographic and Oceanographic Agency, BADA2024 MSL 150 m; modified by regional sampling.','assets':[]}
@@ -148,7 +159,7 @@ def khoa(lon,lat):
         return empty(lon),dict(record,status='outside_region')
     try:
         from netCDF4 import Dataset
-        path,asset=cached_download(KHOA_URL,'KHOA_BADA2024_MSL_150m.nc',400*1024**2,180)
+        path,asset=cached_download(KHOA_URL,'KHOA_BADA2024_MSL_150m.nc',400*1024**2,180,validator=validate_khoa_file)
         record['assets'].append(asset)
         from scipy.interpolate import LinearNDInterpolator
         from scipy.spatial import cKDTree
