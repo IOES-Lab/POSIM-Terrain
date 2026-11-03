@@ -21,7 +21,7 @@ import numpy as np
 
 REVISION = 'osm-sentinel-safe-grid-v1'
 PIPELINE_REVISION = 'osm-sentinel-supported-islands-v2'
-VISUAL_REVISION = 'sentinel-display-v3-land-water'
+VISUAL_REVISION = 'sentinel-display-v4-natural-saturation'
 IMAGERY_REVISION = 'sentinel-recent-v1'
 CELL = .05
 LAND_URL = 'https://osmdata.openstreetmap.de/download/land-polygons-split-4326.zip'
@@ -259,12 +259,11 @@ def upgrade(spec, xs, ys, heights, provider, water, lon, lat, slon, slat, source
 
 def display_image(pixels):
     """Modest display grading of measured RGB, never a terrain/data change."""
-    from PIL import Image, ImageEnhance, ImageFilter
+    from PIL import Image, ImageFilter
     image = Image.fromarray(pixels)
     # Use a fixed pivot across tiles. A per-image average would give adjacent
     # tiles different brightness and introduce seams in a shared satellite pass.
     image = image.point([max(0,min(255,round(128+(v-128)*1.18))) for v in range(256)]*3)
-    image = ImageEnhance.Color(image).enhance(1.20)
     # Restore shadow detail without changing white/black endpoints. Sharpening
     # only counteracts resampling blur; it does not add survey resolution.
     lut = [round(255*(v/255)**.94) for v in range(256)]
@@ -330,7 +329,7 @@ def paint(out, spec, xs, ys, heights):
         return dict(file=path.name,bounds=[float(xs[0]),float(ys[0]),float(xs[-1]),float(ys[-1])],
                     sha256=digest(path),size=[nx,ny],source='Sentinel-2 L2A RGB',nominal_spacing_m=10,
                     display_revision=VISUAL_REVISION,
-                    display_adjustment=dict(contrast=1.18,saturation=1.20,gamma=.94,sharpen_percent=45),
+                    display_adjustment=dict(contrast=1.18,saturation=1.0,gamma=.94,sharpen_percent=45),
                     orientation='north-up; west=u0; north=v1 (COLLADA)',
                     water_on_land_corrected_pixels=corrected,
                     collision_changed=False)
