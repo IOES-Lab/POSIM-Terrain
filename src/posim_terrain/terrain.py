@@ -87,7 +87,8 @@ def gebco_source(requested_url, window):
             metadata=json.loads(prior.read_text())
             candidate(metadata.get('subset_url'),prior.with_name('source.ascii'),metadata.get('source_sha256'))
         except (ValueError,OSError):continue
-    for metadata_path in root.glob('gebco-2026-*.ascii.json'):
+    from .gebco_cache import metadata_candidates
+    for metadata_path in metadata_candidates(root, SOURCE, window):
         try:
             metadata=json.loads(metadata_path.read_text())
             candidate(metadata.get('url'),metadata_path.with_suffix(''),metadata.get('sha256'))
