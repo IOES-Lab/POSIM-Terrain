@@ -57,6 +57,8 @@ build({"latitude": 35.09, "longitude": 129.055,
 
 `auto` combines available bathymetry with Copernicus GLO-30 land. `gebco` uses only GEBCO. Provider URLs, hashes, coverage, quality and vertical datum assumptions are recorded. Missing numeric coverage fails generation.
 
+GEBCO subset lookup uses a SQLite metadata index. File size and modification time identify changed sidecars; selected subsets retain the source URL, raw SHA-256 and coordinate-axis checks. The derived index can be rebuilt or replaced by the verified scan when unavailable. It stores no elevation samples or data approvals.
+
 ## Output and structure
 
 | Path | Contents |
