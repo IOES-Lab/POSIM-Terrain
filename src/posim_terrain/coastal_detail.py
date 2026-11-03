@@ -71,6 +71,21 @@ def imagery_current(manifest, now=None):
     except (KeyError,TypeError,ValueError):return False
 
 
+def cell_is_current(i, j):
+    """Only complete, source-current and checksum-verified cells skip warming."""
+    folder=directory(i,j)
+    try:
+        cached=json.loads((folder/'manifest.json').read_text())
+        if not isinstance(cached,dict):return False
+        expected={'land.json','satellite.png'} if cached.get('status')=='ready' else {'land.json'}
+        hashes=cached.get('hashes')
+        return (cached.get('revision')==REVISION and cached.get('cell')==[i,j]
+                and cached.get('status') in ('ready','no_land') and imagery_current(cached)
+                and isinstance(hashes,dict) and set(hashes)==expected
+                and all(digest(folder/name)==checksum for name,checksum in hashes.items()))
+    except (OSError,ValueError,KeyError,TypeError):return False
+
+
 def imagery_query(bounds, now=None):
     # Globally sorting by cloud cover alone selected a spotless 2020 image
     # over newer observations of reclaimed ports. Prefer recent clear scenes.
@@ -413,6 +428,12 @@ def warm_region(spec):
     xx,yy=np.meshgrid(np.linspace(-spec['width_m']/2,spec['width_m']/2,spec['samples']),
                       np.linspace(-spec['height_m']/2,spec['height_m']/2,spec['samples']))
     cells=keys(*inverse.transform(xx,yy))
+    # A completed region needs neither the global archive nor its extraction.
+    # Check before any large I/O, using the same admission as the refresh loop.
+    if all(cell_is_current(i,j) for i,j in cells):
+        for index,(i,j) in enumerate(cells,1):
+            print(f'{index}/{len(cells)} atlas_{i}_{j} ready',flush=True)
+        return
     archive=Path(os.getenv('WWOS_COAST_OSM_ARCHIVE',''))
     if not archive.is_file():archive,_=cached_download(LAND_URL,'coastal-land-polygons.zip',1500*1024**2,900)
     # Repeated random access inside the compressed global shapefile is costly.
@@ -425,16 +446,7 @@ def warm_region(spec):
                 shutil.copyfileobj(incoming,outgoing)
         dataset=Path(temporary)/Path(member).name
         for index,(i,j) in enumerate(cells,1):
-            folder=directory(i,j)
-            try:
-                cached=json.loads((folder/'manifest.json').read_text())
-                expected={'land.json','satellite.png'} if cached.get('status')=='ready' else {'land.json'}
-                ready=(cached.get('revision')==REVISION and cached.get('cell')==[i,j]
-                       and cached.get('status') in ('ready','no_land') and imagery_current(cached)
-                       and set(cached.get('hashes',{}))==expected
-                       and all(digest(folder/name)==checksum for name,checksum in cached['hashes'].items()))
-            except (OSError,ValueError,KeyError,TypeError):ready=False
-            if not ready:
+            if not cell_is_current(i,j):
                 warm_cell(i,j,coast_dataset=dataset)
             print(f'{index}/{len(cells)} atlas_{i}_{j} ready',flush=True)
 
