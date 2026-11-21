@@ -13,8 +13,6 @@ import urllib.error
 import xml.etree.ElementTree as ET
 
 import numpy as np
-from pyproj import CRS, Transformer
-from scipy.interpolate import RegularGridInterpolator
 
 SOURCE = 'https://dap.ceda.ac.uk/thredds/dodsC/bodc/gebco/global/gebco_2026/ice_surface_elevation/netcdf/GEBCO_2026.nc'
 DOI = '10.5285/4f68d5c7-45eb-f999-e063-7086abc036fa'
@@ -33,6 +31,8 @@ def validate(spec):
     return dict(spec, samples=spec.get('samples',129), source_policy=spec.get('source_policy','auto'))
 
 def projection(spec):
+    from pyproj import CRS, Transformer
+
     local = CRS.from_proj4(f"+proj=aeqd +lat_0={spec['latitude']} +lon_0={spec['longitude']} +datum=WGS84 +units=m")
     forward=Transformer.from_crs('EPSG:4326',local,always_xy=True)
     inverse=Transformer.from_crs(local,'EPSG:4326',always_xy=True)
@@ -172,6 +172,8 @@ def longitude_groups(lon):
 
 def gebco_grid(lon,lat,out):
     """Join real edge pixels periodically; never clamp or invent seam depths."""
+    from scipy.interpolate import RegularGridInterpolator
+
     a=max(0,math.floor((lat.min()+90)*240-.5)-1);b=min(43199,math.ceil((lat.max()+90)*240-.5)+1)
     seam=np.ptp(lon)>180 or lon.min()<-179.9979 or lon.max()>179.9979
     windows=[]
@@ -268,6 +270,8 @@ def build(spec, out, *, engine_world=True, validate_sdf=True, numeric_only=False
     if not np.isfinite(heights).all():
         (out/'source-providers.json').write_text(json.dumps({'providers':providers,'baseline_status':baseline_status,'missing_vertices':int((~np.isfinite(heights)).sum())},indent=2))
         raise ValueError('terrain_source_gaps_without_baseline_'+str(int((~np.isfinite(heights)).sum())))
+    from scipy.interpolate import RegularGridInterpolator
+
     centre=float(RegularGridInterpolator((ys,xs),heights)([[(ys[0]+ys[-1])/2,(xs[0]+xs[-1])/2]])[0])
     counts={'GEBCO_2026':int((provider<2).sum()),'Copernicus_GLO30':int((provider==2).sum())}
     from .bathymetry import SOURCE_IDS,config_fingerprint
