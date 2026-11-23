@@ -22,6 +22,9 @@ from .engine_identity import revision
 POSIM = revision()
 VERSION = 8
 
+class SdfValidationTimeout(subprocess.TimeoutExpired):
+    """Gazebo exceeded the generated world validation deadline."""
+
 def validate(spec):
     for k in ('latitude', 'longitude', 'width_m', 'height_m'):
         if not isinstance(spec.get(k), (int, float)) or not math.isfinite(spec[k]): raise ValueError('invalid_' + k)
@@ -204,7 +207,9 @@ def world_template():
         share=get_package_share_directory('dave_worlds');name='dave_ocean_waves.world'
     return Path(share)/'worlds'/name
 
-def build(spec, out, *, engine_world=True, validate_sdf=True, numeric_only=False):
+def build(spec, out, *, engine_world=True, validate_sdf=True, numeric_only=False,
+          sdf_validator=('gz', 'sdf')):
+    """Build terrain, optionally selecting the command prefix for SDF validation."""
     if numeric_only and (engine_world or validate_sdf):
         raise ValueError('numeric_only_requires_no_engine_or_sdf_validation')
     spec=validate(spec);out=Path(out);out.mkdir(parents=True,exist_ok=True)
@@ -319,7 +324,11 @@ def build(spec, out, *, engine_world=True, validate_sdf=True, numeric_only=False
     (out/'manifest.json').write_text(json.dumps(meta,indent=2))
     ET.indent(tree);tree.write(out/'world.sdf',encoding='utf-8',xml_declaration=True)
     if validate_sdf:
-        result=subprocess.run(['gz','sdf','-k',str(out/'world.sdf')],capture_output=True,text=True,timeout=20)
+        try:
+            result=subprocess.run([*sdf_validator,'-k',str(out/'world.sdf')],capture_output=True,text=True,timeout=20)
+        except subprocess.TimeoutExpired as error:
+            raise SdfValidationTimeout(error.cmd, error.timeout, output=error.stdout,
+                                       stderr=error.stderr) from error
         (out/'sdf-validation.txt').write_text(result.stdout+result.stderr)
         if result.returncode:raise ValueError('generated_sdf_invalid')
     meta['engine_world']=engine_world
